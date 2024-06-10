@@ -12,11 +12,17 @@ using std::string;
 using std::array;
 using std::printf;
 using std::size_t;
+using std::pair;
 string true_string ("true"),
   false_string ("false");
 void print_int (int i) { std::cout << i; }
+void print_longlong (long long i) { std::cout << i; }
+#define print_int_of(i) (printf (#i": "), print_int (i), printf ("\n"))
+#define print_double_of(i) (printf (#i": "), print_double (i), printf ("\n"))
+#define print_longlong_of(i) (printf (#i": "), print_longlong (i), printf ("\n"))
 void printnl () { std::cout << std::endl; }
 void print_bool (bool f) { std::cout << (f ? true_string : false_string); }
+void print_double (double d) { std::cout << d; }
 int max (int a, int b) { return a >= b ? a : b; }
 
 template<class ios_t>		// std::basic_ios<CharT, Traits>
@@ -93,6 +99,18 @@ vector<int> read_space_seperated_ints (size_t num)
       expect (' ');
     }
   expect ('\n');
+  return res;
+}
+
+vector<int> read_space_seperated_ints_inf ()
+{
+  vector<int> res;
+  failbit_setter<std::basic_ios<char>> fs (std::cin);
+  while (std::cin.peek () != '\n')
+    {
+      res.push_back (read_int ());
+    }
+  std::cin.get ();
   return res;
 }
 
