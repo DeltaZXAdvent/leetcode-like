@@ -4,42 +4,11 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
-using std::string;
-string true_string ("true"),
-  false_string ("false");
-
-string print_bool (bool v)
-{
-  return v ? true_string : false_string;
-}
-void print (string s) { std::cout << s; }
-void printnl () { std::cout << std::endl; }
-void print_int (int i)
-{
-  std::cout << i;
-}
-
-template<class ios_t>		// std::basic_ios<CharT, Traits>
-struct failbit_setter
-{
-  std::ios_base::iostate original_mask;
-  ios_t& ios;
-  failbit_setter (ios_t& ios): ios (ios)
-  {
-    original_mask = ios.exceptions ();
-    ios.exceptions (std::ios_base::badbit |
-		    std::ios_base::eofbit |
-		    std::ios_base::failbit);
-  }
-  ~failbit_setter ()
-  {
-    ios.exceptions (original_mask);
-    ios.clear ();
-  }
-};
+#include <cstdint>
+#include "utils.hpp"
 
 // Need newline or not?
-int read_int ()
+int old_read_int ()
 {
   using namespace std;
   int res;
@@ -52,26 +21,39 @@ void test_failbit_setter ()
 {
   using std::printf;		// DEBUG
   try
-    { read_int (); }
+    { old_read_int (); }
   catch (std::ios_base::failure& e)
     { std::printf ("failure catched\n"); }
-  print (print_bool (std::cin.fail ()));
-  print (" ");
-  print (print_bool (std::cin.exceptions () & std::ios_base::failbit));
+  print_bool (std::cin.fail ());
+  printf (" ");
+  print_bool (std::cin.exceptions () & std::ios_base::failbit);
   printnl ();
-  read_int ();
+  old_read_int ();
 }
 
-void test_read_int ()
+void test_old_read_int ()
 {
-  print_int (read_int ());
-  print (" ");
-  print_int (read_int ());
+  print_int (old_read_int ());
+  printf (" ");
+  print_int (old_read_int ());
   printnl ();
 }
 
 int main (int argc, char *argv[])
 {
+  // int& i = 1;			// ERROR
+  print_int (i); printnl ();
+  return 0;
+  
+  if (std::cin.eof ())
+    printf ("eof\n");
+  return 0;
+  
+  printf ("%zu\n", sizeof (size_t));
+  printf ("%zu\n", sizeof (int));
+  printf ("%zu\n", sizeof (std::intptr_t));
+  return 0;
+  
   // noskipws has to be cleared ^^;
   int var;
   std::cin >> std::noskipws >> var;
@@ -87,7 +69,7 @@ int main (int argc, char *argv[])
   
   using map = std::map<int, int>;
   map ct{};
-  print (print_bool (ct[0] == 0));
+  print_bool (ct[0] == 0);
   printnl ();
   ct[0] += 1;
   return 0;

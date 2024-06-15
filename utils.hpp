@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <stdexcept>
 #include <cassert>
+#include <memory>
 using std::vector;
 using std::map;
 using std::string;
@@ -24,6 +25,7 @@ void printnl () { std::cout << std::endl; }
 void print_bool (bool f) { std::cout << (f ? true_string : false_string); }
 void print_double (double d) { std::cout << d; }
 int max (int a, int b) { return a >= b ? a : b; }
+int min (int a, int b) { return a >= b ? b : a; }
 
 template<class ios_t>		// std::basic_ios<CharT, Traits>
 struct failbit_setter
@@ -124,4 +126,18 @@ void print_vector (vector<int>& v)
       printf (" ");
     }
   printnl ();
+}
+
+string read_capital_string ()
+{
+  string res;
+  while (true)
+    {
+      char ch = std::cin.peek ();
+      if (!('A' <= ch && ch <= 'Z')) break;
+      res.push_back (std::cin.get ());
+    }
+  if (res.length () == 0)
+    throw std::logic_error (__func__);
+  return res;
 }

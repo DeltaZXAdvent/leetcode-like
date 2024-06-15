@@ -53,6 +53,9 @@ const slot UNDEFINED = 0;
 // This algorithm only provides support for calculating when m and n is fixed
 // The cache only manages 0 <= a < m and 0 <= b <= n
 static slot values[(m) - (0)][(n + 1) - (0)] = { UNDEFINED }; // No need for b larger than n
+// Oh, this could actually be smaller: for every line only store less than a * (a + 1) / 2 values
+// But which is more efficient? The new array will need the function cache to compute more to find the index.
+// But the it only requires a little more calculation because the multiplication is only polynomial to the logarithm of length of a
 slot& cache (int a, int b)
 {
   if (!(0 <= a && a < m &&
