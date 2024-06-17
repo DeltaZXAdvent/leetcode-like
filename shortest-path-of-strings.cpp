@@ -26,6 +26,9 @@ struct cache_t
   }
 };
 
+// language usage explanation:
+// Originally I want to use global variables for function f to have access to,
+// but the construct/destruct model makes this impossible. So I made a class called cache_t.
 int shortest_path (string s, string t)
 {
   cache_t cache (s.size (), t.size ());
