@@ -19,6 +19,7 @@ string true_string ("true"),
 void print_int (int i) { std::cout << i; }
 void print_longlong (long long i) { std::cout << i; }
 #define print_int_of(i) (printf (#i": "), print_int (i), printf ("\n"))
+#define print_bool_of(i) (printf (#i": "), print_bool (i), printf ("\n"))
 #define print_double_of(i) (printf (#i": "), print_double (i), printf ("\n"))
 #define print_longlong_of(i) (printf (#i": "), print_longlong (i), printf ("\n"))
 void printnl () { std::cout << std::endl; }

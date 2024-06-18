@@ -25,7 +25,7 @@ struct
     return edges_internal[u][v];
   }
 
-  std::map<vertex_t, std::unordered_map<vertex_t, int>> edges_internal;
+  std::unordered_map<vertex_t, std::unordered_map<vertex_t, int>> edges_internal;
   void add_vertex (vertex_t u)
   {
     Vertices.insert (u);
@@ -43,17 +43,18 @@ struct
 template<class container>
 struct pseudo_map_value
 {
-  container data;
+  container& data;
   using key_type = typename container::key_type;
   using mapped_type = typename container::mapped_type;
-  key_type key, default_key;
+  key_type key;
+  mapped_type default_mapped;
   operator key_type ()
   {
-    return data.find (key) == data.end () ? data[key] : default_key;
+    return data.find (key) == data.end () ? default_mapped : data[key];
   }
-  auto operator= (mapped_type value)
+  auto operator= (mapped_type mapped)
   {
-    return data[key] = value;
+    return data[key] = mapped;
   }
 };
 
@@ -62,7 +63,7 @@ struct
   std::map<vertex_t, int> data;
   auto operator[] (vertex_t u)
   {
-    return pseudo_map_value<decltype (data)> { .data = data, .key = u, .default_key = infinity } ;
+    return pseudo_map_value<decltype (data)> { .data = data, .key = u, .default_mapped = infinity } ;
   }
   size_t size ()
   {
@@ -124,8 +125,8 @@ struct
   void change_priority (vertex_t v, int priority)
   {
     if (indices.find (v) == indices.end ())
-      decrease_priority (v, priority);
-    else add_with_priority (v, priority);
+      add_with_priority (v, priority);
+    else decrease_priority (v, priority);
   }
   std::vector<std::pair<vertex_t, int>> data;
   std::map<vertex_t, size_t> indices;
@@ -137,7 +138,7 @@ struct
   std::map<vertex_t, vertex_t> data;
   auto operator[] (vertex_t u)
   {
-    return pseudo_map_value<decltype (data)> { .data = data, .key = u, .default_key = nil_node } ;
+    return pseudo_map_value<decltype (data)> { .data = data, .key = u, .default_mapped = nil_node } ;
   }
 } prev;
 
@@ -208,23 +209,31 @@ int Dijkstra (vertex_t source)
   while (!Q.empty ())
     {
       u = Q.extract_min ();
+      // for (auto v: Graph.edges_internal[u])
+      // 	{
+      // 	  print_int (v.first); printf (" ");
+      // 	}
+      // printnl ();
       for (vertex_t v: Graph.neighbors (u))
 	{
-	  print_int (v); printf (" ");
+	  // print_int_of (v);
 	  int alt = dist[u] + Graph.Edges (u, v);
+	  // print_int_of (alt);
+	  // print_int_of (dist[v]);
 	  if (alt < dist[v])
 	    {
 	      prev[v] = u;
 	      dist[v] = alt;
+	      // print_int_of (dist[v]);
 	      Q.change_priority (v, alt);
 	    }
 	}
-      printnl ();
+      // printnl ();
     }
 
   "return std::make_pair (dist, prev)";
-  print_int (dist.size ()); printnl ();
-  print_int (vertex_ct); printnl ();
+  // print_int (dist.size ()); printnl ();
+  // print_int (vertex_ct); printnl ();
   if (dist.size () != vertex_ct)
     return -1;
   else return dist[u];
