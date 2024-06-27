@@ -108,23 +108,8 @@ void test_reverse_slist ()
   }
 }
 
-void try_splice_after ()
-{
-  slist l = { 1, 2, 3, 4, 5 };
-  slist::iterator it = l.before_begin ();
-  l.splice_after (l.before_begin (), l, it);
-  cout << *++it << endl;
-  l.splice_after (l.before_begin (), l, it);
-  cout << *++it << endl;
-  l.splice_after (l.before_begin (), l, it);
-  cout << *++it << endl;
-  
-  print (l.begin (), l.end ());
-}
-
 int main (int argc, char *argv[])
 {
-  // try_splice_after ();
   test_reverse_slist ();
   return 0;
 }
