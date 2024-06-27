@@ -102,3 +102,6 @@ int main(int, char*[])
     return EXIT_SUCCESS;
 }
 
+// lessons learnt:
+// * use typedef rather to declare type aliases ('using' is better for members possibly)
+// * Graphviz for graph plotting

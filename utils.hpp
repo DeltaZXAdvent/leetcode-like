@@ -117,16 +117,23 @@ vector<int> read_space_seperated_ints_inf ()
   return res;
 }
 
-void print_vector (vector<int>& v)
+template<class iterator>
+void print (iterator first, iterator last)
 {
-  auto it = v.begin ();
+  iterator it = first;
   while (true)
     {
-      print_int (*it++);
-      if (it == v.end ()) break;
-      printf (" ");
+      std::cout << *it++;
+      if (it == last) break;
+      std::cout << ' ';
     }
-  printnl ();
+  std::cout << std::endl;
+}
+
+// DEPRECATED
+void print_vector (vector<int>& v)
+{
+  print (v.begin (), v.end ());
 }
 
 string read_capital_string ()
