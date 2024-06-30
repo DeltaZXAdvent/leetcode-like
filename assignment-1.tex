@@ -1,4 +1,21 @@
-\documentclass{ctexart}
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{listings}
 \begin{document}
-
+\lstset{
+  emph={
+    fibonacci_recursive,
+    fibonacci_iteration,
+    reverse,
+    merge,
+    majority,
+    reverse_slist,
+    slist_circular_p,
+    slist_merge,
+    slist_last,
+    slist_sort
+  },
+  emphstyle=\color{gray}
+}
+\lstinputlisting[language=C++]{assignment-1.cpp}
 \end{document}

@@ -1,22 +1,29 @@
 #include <iostream>
 #include <stdexcept>
-#include <cassert>
 #include <vector>
 #include <forward_list>
 using namespace std;
+#define run_test(test) ({ cout << #test << endl; (test_##test) (); })
 typedef vector<int> vec;
 typedef forward_list<int> slist;
 template<class iterator>
-void print (iterator first, iterator last)
+ostream& print (ostream& os, iterator first, iterator last)
 {
   iterator it = first;
-  while (true)
-    {
-      std::cout << *it++;
-      if (it == last) break;
-      std::cout << ' ';
-    }
-  std::cout << std::endl;
+  if (it != last)
+    while (true)
+      {
+	os << *it++;
+	if (it == last) break;
+	os << ' ';
+      }
+  os << endl;
+  return os;
+}
+template<class container>
+ostream& print (ostream& os, container v)
+{
+  return print (os, v.begin (), v.end ());
 }
 
 int fibonacci_recursive (int n) {
@@ -97,19 +104,138 @@ void test_reverse_slist ()
   {
     slist l = { 1, 2, 3, 4, 5 };
     l.reverse ();
-    print (l.begin (), l.end ());
-    if (not (l == slist { 5, 4, 3, 2, 1 })) throw runtime_error (__func__);
+    print(cout, l);
+    if (not (l == slist { 5, 4, 3, 2, 1 }))
+      throw runtime_error (__func__);
   }
   {
     slist l = { 1, 2, 3, 4, 5 };
     reverse_slist (l);
-    print (l.begin (), l.end ());
-    if (not (l == slist { 5, 4, 3, 2, 1 })) throw runtime_error (__func__);
+    print (cout, l);
+    if (not (l == slist { 5, 4, 3, 2, 1 }))
+      throw runtime_error (__func__);
   }
+}
+
+bool slist_circular_p (slist& l)
+{
+  slist::iterator slow = l.before_begin (),
+    fast = l.before_begin ();
+  do
+    {
+      ++fast;
+      if (fast == l.end ()) return false;
+      ++fast;
+      if (fast == l.end ()) return false;
+      ++slow;
+    }
+  while (slow != fast);
+  return true;
+}
+
+slist& slist_merge (slist& l1, slist& l2)
+{
+  slist::iterator it1 = l1.before_begin (),
+    it2 = l2.before_begin ();
+  print (cout, l1);
+  print (cout, l2);
+  while (next (it1) != l1.end () && next (it2) != l2.end ())
+    {
+      if (*next (it1) <= *next (it2))
+	++it1;
+      else
+	{
+	  l1.splice_after (it1, l2, it2);
+	  ++it1;
+	}
+    }
+  while (next (it1) != l1.end ())
+    ++it1;
+  while (next (it2) != l2.end ())
+    {
+      l1.splice_after (it1, l2, it2);
+      ++it1;
+    }
+  return l1;
+}
+
+void test_slist_merge ()
+{
+  {
+    slist list1 = {1, 3, 3, 5, 9},
+      list2 = {2,3,4,4,7,8};
+    print (cout, list1);
+    print (cout, list2);
+    list1.merge (list2);
+    print (cout, list1);
+    print (cout, list2);
+  }
+  {
+    slist list1 = {1, 3, 3, 5, 9},
+      list2 = {2,3,4,4,7,8};
+    print (cout, list1);
+    print (cout, list2);
+    slist_merge (list1, list2);
+    print (cout, list1);
+    print (cout, list2);
+  }
+}
+
+slist::iterator slist_last (slist& l, size_t k)
+{
+  slist::iterator slow = l.before_begin (),
+    fast = l.before_begin ();
+  do
+    {
+      ++fast;
+      k--;
+      if (fast == l.end ()) return l.end ();
+    }
+  while (k > 0);
+  do
+    {
+      ++slow;
+      ++fast;
+    }
+  while (fast != l.end ());
+  return slow;
+}
+
+void test_slist_last ()
+{
+  slist l { 1, 2, 3, 4, 5, 6, 7 };
+  cout << *slist_last (l, 4) << endl;
+}
+
+void slist_sort (slist& l)
+{
+  // A) If using merge sort,
+  // only a middle iterator has to be found, which takes time linear
+  // to the length of the current list.
+  // So the time and complexity are still the same,
+  // while because the additional space required for merging linked
+  // lists are O(1), the total space complexity is O(1).
+  
+  // B) If using quick sort,
+  // backward referencing is not supported in singly-linked list,
+  // so one beforehand traverse is needed to provide backward
+  // references (e.g. an array of pointers),
+  // if quick sort is still to be used.
+
+  // C) If using heap sort,
+  // because parents (in the up heap operation) and children (in the
+  // heapify operation) must be referenced,
+  // so an array has better to be used.
+
+  // D) In the C++ standard library,
+  // std::sort require RandomAccessIterator;
+  // std::qsort requires array.
 }
 
 int main (int argc, char *argv[])
 {
-  test_reverse_slist ();
+  run_test (reverse_slist);
+  run_test (slist_merge);
+  run_test (slist_last);
   return 0;
 }
