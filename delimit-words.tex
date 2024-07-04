@@ -1,0 +1,58 @@
+\documentclass{article}
+\begin{document}
+\section*{Match the longest word in dictionary not necessarily starting from the beginning}
+Solving this problem is due to misunderstanding of the original problem.
+It should be equivalent to the Aho--Corasick algorithm.
+\small
+\begin{verbatim}
+Maintain a data structure resembling a trie, with extra edges from nodes for mismatches.
+The data structure can be implemented in graph (with a root node, used as an automaton).
+The data in the graph or trie:
+  Nodes: Depth, the depth of the root being 0
+         The length of the last complete match, if none, set 0
+         Partial match length (maybe in a seperate location)
+  Edges: A char_type value denoting the matched character,
+         which can have a value representing mismatch
+The trie can be implemented with in-order next pointers.
+
+The algorithm:
+Step 1, set up the nodes:
+  maintain a current node, initialized with the root node
+  for each word in dictionary do
+    for each character c in word do
+      if the current node has en edge with value c
+        follow the edge, update the current node
+      else
+        allocate a new node with incremented depth and a last match length same as the old node
+        create an edge from the old node to the new node with value c,
+        update the current node
+    set the last match length of the current node to be the depth
+
+(Possibly contains some delicacies wrongly dealt with)
+Step 2, calculate the mismatch goto node for every node as in the Knuth--Morris-Pratt algorithm
+  set the partial match length of the root node and the nodes of depth 1 to be 0
+  for each node from the root node, do an in-order traversal
+    calculate the partial match length of the current node according to the one of its parent, and
+    update the mismatch edge
+
+Step 3, match against a character stream
+  maintain a current node and a current matched (not necessarily completely) text, and
+    a last complete match node initialized with NULL
+    --this is the current state of the automaton
+  fetch the next character ch
+    if there is a corresponding edge, advance through it
+      if the new current node is a complete match node
+        update the last complete match length
+    else (mismatch)
+      if the last complete match node is not NULL
+        move back to that node, update the current matched text, and
+        output the match, and put back the additional text
+      else
+        follow the mismatch edge, update the states (...)
+
+\end{verbatim}
+As we can see the above example, an algorithm may often need addtional augmented data to make it quicker.
+But you can always have a rough overview on what data is available, and then add it to the original data structure.
+
+For example, the ``put back'' operation of the character stream.
+\end{document}
