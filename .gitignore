@@ -3,3 +3,4 @@ figs
 *.aux
 *.log
 *.pdf
+ltximg/**
