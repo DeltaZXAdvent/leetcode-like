@@ -105,7 +105,6 @@ vec search_multiple (vec::iterator start, vec::iterator end, vec u)
   return res;
 }
 
-// TODO random seed
 // generates an array and sorts it (this is probably not that efficient)
 vec random_sorted_vector (int l, default_random_engine &re)
 {
