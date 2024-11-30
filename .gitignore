@@ -4,3 +4,8 @@ figs
 *.log
 *.pdf
 ltximg/**
+*.class
+ltximg
+.cpcache
+.idea
+target
