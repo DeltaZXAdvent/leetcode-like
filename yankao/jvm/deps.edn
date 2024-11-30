@@ -1,7 +1,0 @@
-{:paths ["."]
- :deps {
-        localdir/name {:local/root "."}}
- :aliases {
-           :alias-name {
-                        :jvm-opts ["-Djdk.attach.allowAttachSelf"]}}
- }

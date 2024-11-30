@@ -1,7 +1,0 @@
-[package]
-name = "rust-experiments"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-kmp = "0.1.1"
