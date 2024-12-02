@@ -17,6 +17,8 @@ static_assert (__cplusplus <= 201703L);
 #include <random>
 #include <chrono>
 #include <stdexcept>
+#include <vector>
+#include <type_traits>
 extern "C" {
 #include <semaphore.h>
 }
@@ -34,15 +36,24 @@ struct semaphore
   { assert (!sem_wait (&sem)); }
   void signal ()
   { assert (!sem_post (&sem)); }
+  semaphore (const semaphore&) = delete;
+  semaphore (semaphore&&) = delete;
 };
 
-template<class... Args>
-void locked_printf (const char *format, Args... args)
-{
-  static mutex lock;
-  lock_guard<mutex> guard (lock);
-  printf (format, args...);
-}
+/**
+ * C++ holy crap, ok, still reasonable
+ */
+static_assert (!is_copy_constructible_v<semaphore>
+	       && !is_move_constructible_v<semaphore>);
+
+// Not needed, printf is inherently thread-safe, see the C standard
+// template<class... Args>
+// void locked_printf (const char *format, Args... args)
+// {
+//   static mutex lock;
+//   lock_guard<mutex> guard (lock);
+//   printf (format, args...);
+// }
 
 size_t my_rand (size_t min, size_t max)
 {
@@ -55,23 +66,23 @@ dining_philosophers_pairwise_lock (size_t n,
 				   size_t m)
 {
   assert (n >= 3 && m >= 1);
-  unique_ptr<semaphore[]> chopsticks = make_unique<semaphore[]>(n);
+  vector<semaphore> chopsticks (n);
   semaphore bowls (m);
-  unique_ptr<thread[]> philosophers = make_unique<thread[]>(n);
+  vector<thread> philosophers (n);
   size_t total = 0;
   for (size_t i = 0; i < n; ++i)
     {
       philosophers[i] = thread ([&] (size_t i) {
 	while (true)
 	  {
-	    locked_printf ("%d thinks\n", i);
+	    printf ("%d thinks\n", i);
 	    this_thread::sleep_for (chrono::milliseconds (my_rand (400, 800)));
 	    size_t first = i % 2 ? (i + 1) % n : i,
 	      second = i % 2 ? i : (i + 1) % n;
 	    chopsticks[first].wait ();
 	    chopsticks[second].wait ();
 	    bowls.wait ();
-	    locked_printf ("%d eats, eat count: %d\n", i, ++total);
+	    printf ("%d eats, eat count: %d\n", i, ++total);
 	    this_thread::sleep_for (chrono::milliseconds (my_rand (400, 800)));
 	    bowls.signal ();
 	    chopsticks[second].signal ();
@@ -87,28 +98,28 @@ dining_philosophers_restrict_number (size_t n,
 				     size_t m)
 {
   assert (n >= 3 && m >= 1);
-  unique_ptr<semaphore[]> chopsticks = make_unique<semaphore[]>(n);
+  vector<semaphore> chopsticks (n);
   semaphore bowls (min (m, n - 1));
-  unique_ptr<thread[]> philosophers = make_unique<thread[]>(n);
+  vector<thread> philosophers (n);
   size_t total = 0;
   for (size_t i = 0; i < n; ++i)
     {
       philosophers[i] = thread ([&] (size_t i) {
 	while (true)
 	  {
-	    locked_printf ("%d thinks\n", i);
+	    printf ("%d thinks\n", i);
 	    this_thread::sleep_for (chrono::milliseconds (my_rand (400, 800)));
 	    chopsticks[i].wait ();
-	    locked_printf ("%d picked fork %d\n", i, i);
+	    printf ("%d picked fork %d\n", i, i);
 	    chopsticks[(i + 1) % n].wait ();
-	    locked_printf ("%d picked fork %d\n", i, (i + 1) % n);
+	    printf ("%d picked fork %d\n", i, (i + 1) % n);
 	    bowls.wait ();
-	    locked_printf ("%d eats, eat count: %d\n", i, ++total);
+	    printf ("%d eats, eat count: %d\n", i, ++total);
 	    this_thread::sleep_for (chrono::milliseconds (my_rand (400, 800)));
 	    bowls.signal ();
 	    chopsticks[(i + 1) % n].signal ();
 	    chopsticks[i].signal ();
-	    locked_printf ("%d released fork %d, %d\n", i, i, (i + 1) % n);
+	    printf ("%d released fork %d, %d\n", i, i, (i + 1) % n);
 	  }
       }, i);
     }
@@ -122,7 +133,7 @@ dining_philosophers_restrict_number (size_t n,
  */
 int main (int argc, char *argv[])
 {
-  size_t n = 5, m = 3;
+  size_t n = 100, m = 50;
   assert (argc == 2);
   string type (argv[1]);
   if (type == "0")
