@@ -12,7 +12,7 @@ struct task_timer
   chrono::time_point<chrono::system_clock> begin;
   void start (string task)
   {
-    cout << "Start timer for task \"" << task << "\"?" << endl;
+    cout << "Start timer for task \"" << task << "\"? ";
     cin.ignore (numeric_limits<int>::max (), '\n');
     begin = clock.now ();
   }
