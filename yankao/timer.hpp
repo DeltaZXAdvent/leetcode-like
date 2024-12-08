@@ -5,22 +5,21 @@
       (exp);					\
       tt.stop ();				\
     })
-using namespace std;
 struct task_timer
 {
-  chrono::system_clock clock;
-  chrono::time_point<chrono::system_clock> begin;
-  void start (string task)
+  std::chrono::system_clock clock;
+  std::chrono::time_point<std::chrono::system_clock> begin;
+  void start (std::string task)
   {
-    cout << "Start timer for task \"" << task << "\"? ";
-    cin.ignore (numeric_limits<int>::max (), '\n');
+    std::cout << "Start timer for task \"" << task << "\"? ";
+    std::cin.ignore (std::numeric_limits<int>::max (), '\n');
     begin = clock.now ();
   }
   void stop ()
   {
-    cout << "Cost time: "
-	 << chrono::duration_cast<chrono::duration<double>> (clock.now () - begin).count ()
-	 << endl;
+    std::cout << "Cost time: "
+	      << std::chrono::duration_cast<std::chrono::duration<double>> (clock.now () - begin).count ()
+	      << std::endl;
   }
 };
-task_timer tt;
+extern task_timer tt;

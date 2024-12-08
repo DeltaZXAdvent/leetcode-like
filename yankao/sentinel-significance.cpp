@@ -1,6 +1,7 @@
-#define BOOST_TEST_MODULE cpp essentials
+// #define BOOST_TEST_MODULE sentinel test
 // BUG if you use g++ with -l flag it still links statistically?
 #define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MAIN
 #include <boost/test/unit_test.hpp>
 #include <cstdio>
 #include <iterator>
@@ -8,12 +9,11 @@
 #include <type_traits>
 #include <vector>
 #include <iostream>
-#include <random>
 #include <limits>
 #include <utility>
-#include <boost/test/unit_test.hpp>
 #include <boost/type_traits/has_less.hpp>
 #include "timer.hpp"
+#include "util.hpp"
 
 using namespace std;
 
@@ -88,36 +88,6 @@ void insertion_sort_sentinel (iter first, iter last)
 }
 
 /**
- * I can't actually comprehend this now
- */
-int my_rand (int min = numeric_limits <int>::min (),
-	     int max = numeric_limits <int>::max ())
-{
-  static random_device dev;
-  static mt19937 rng(dev ());
-  return uniform_int_distribution (min, max) (rng);
-}
-
-vector <int> rand_vec (vector<int>::size_type size,
-		       int min = numeric_limits <int>::min (),
-		       int max = numeric_limits <int>::max ())
-{
-  vector <int>&& vec = vector <int>();
-  while (size--)
-    vec.push_back (my_rand (min, max));
-  return vec;
-}
-
-template <class T>
-ostream& operator<< (ostream& os, vector <T> vec)
-{
-  for (T& e: vec)
-      os << e << ' ';
-  os << endl;
-  return os;
-}
-
-/**
  * Wow sentinel version is really faster:(the compiler probably cannot handle this)
  * Running 1 test case...
  * Start timer for task "insertion_sort (vec.begin (), vec.end ())"? 
@@ -126,6 +96,8 @@ ostream& operator<< (ostream& os, vector <T> vec)
  * Cost time: 1.79313
  * 
  * *** No errors detected
+ *
+ * Oh I should have used ~-log_level=all~, which boost supports
  */
 BOOST_AUTO_TEST_CASE (test_insertion_sort_sentinel)
 {

@@ -9,3 +9,4 @@ ltximg
 .cpcache
 .idea
 target
+*.o
