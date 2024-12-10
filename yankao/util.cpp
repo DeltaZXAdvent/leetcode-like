@@ -21,3 +21,12 @@ vector <int> rand_vec (vector<int>::size_type size,
     vec.push_back (my_rand (min, max));
   return vec;
 }
+
+namespace my
+{
+  void getline ()
+  {
+    cin.ignore (std::numeric_limits <int>::max (), '\n');
+  }
+}
+

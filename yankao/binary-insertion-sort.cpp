@@ -1,7 +1,6 @@
 // #define BOOST_TEST_MODULE sentinel test
 // BUG if you use g++ with -l flag it still links statistically?
 #define BOOST_TEST_DYN_LINK
-// TODO wtf link failure
 // #define BOOST_TEST_NO_MAIN
 #include <boost/test/unit_test.hpp>
 #include <algorithm>
@@ -10,9 +9,12 @@
 #include <iostream>
 #include <type_traits>
 #include <boost/type_traits/has_less.hpp>
+#include <cassert>
+#include <functional>
 
 #include "util.hpp"
 #include "timer.hpp"
+#include "textbook-qsort.hpp"
 
 using namespace std;
 
@@ -39,22 +41,35 @@ template <class iter,
 		       int> = 0>
 void insertion_sort (iter first, iter last);
 
-BOOST_AUTO_TEST_CASE (test_binary_insertion_sort)
+BOOST_AUTO_TEST_CASE (test_sort)
 {
-  vector <int> foo = rand_vec (15000, 10000, 99999),
-    bar = foo;
-  cout << "foo: ";
-  cin.ignore (std::numeric_limits <int>::max (), '\n');
-  cout << foo;
-  cout << "bar: ";
-  cin.ignore (std::numeric_limits <int>::max (), '\n');
-  cout << bar;
-  timer (insertion_sort (foo.begin (), foo.end ()));
-  timer (binary_insertion_sort (bar.begin (), bar.end ()));
-  cout << "foo: ";
-  cin.ignore (std::numeric_limits <int>::max (), '\n');
-  cout << foo;
-  cout << "bar: ";
-  cin.ignore (std::numeric_limits <int>::max (), '\n');
-  cout << bar;
+  vector <int> foo = rand_vec (900000, 100000, 999999),
+    bar = foo, var = foo;
+  my::getline ();
+  display (foo);
+  my::getline ();
+  display (bar);
+  display (sizeof (int));
+  display (sizeof (foo.begin ()));
+  timer (qsort_textbook (foo.begin (), foo.end ()));
+  BOOST_TEST (foo != bar);
+  // my::getline ();
+  // display (foo);
+  timer (qsort_declarative (bar.begin (), bar.end ()));
+  timer (qsort_ita <vector <int> > (var, 0, var.size () - 1));
+  BOOST_TEST ((foo == bar && bar == var));
+  my::getline ();
+  if (foo != bar)
+    {
+      display (foo[0]);
+      display (bar[0]);
+      my::getline ();
+      transform (foo.begin (), foo.end (),
+		 bar.begin (), foo.begin (),
+		 minus <int>());
+      display (foo[0]);
+      display (bar[0]);
+    }
+  my::getline ();
+  display (bar);
 }

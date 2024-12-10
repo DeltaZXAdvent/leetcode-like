@@ -98,10 +98,14 @@ void insertion_sort_sentinel (iter first, iter last)
  * *** No errors detected
  *
  * Oh I should have used ~-log_level=all~, which boost supports
+ *
+ * <2024-12-11 Wed 01:02>
+ * Compiled with ~-O3~, it's much faster and I can use a ten times length vector
+ * with a close sorting time
  */
 BOOST_AUTO_TEST_CASE (test_insertion_sort_sentinel)
 {
-  vector vec (rand_vec (15000, 10000, 99999)),
+  vector vec (rand_vec (150000, 100000, 999999)),
     vec2 = vec;
   
   // cout << vec;

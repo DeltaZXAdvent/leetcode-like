@@ -12,6 +12,12 @@ std::ostream& operator<< (std::ostream& os, std::vector <T>& vec)
 {
   for (T& e: vec)
     os << e << ' ';
-  os << std::endl;
   return os;
 }
+
+namespace my
+{
+  void getline ();
+}
+
+#define display(v) std::cout << #v ": " << v << '\n';
