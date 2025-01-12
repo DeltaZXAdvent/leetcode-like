@@ -6,24 +6,28 @@ public class Solution {
 
     
     /**
-     * https://leetcode.cn/problems/maximum-subarray-with-equal-products/
+     * <a href="https://leetcode.cn/problems/maximum-subarray-with-equal-products/">
+     * https://leetcode.cn/problems/maximum-subarray-with-equal-products/</a>
      * 
      * <p>Inquiry:
      * Such an subarray is either consist of only two elements,
      * one element 1, or relatively prime numbers
      * (Proof: factorize the numbers)
      * 
-     * @return max (2, max length of relatively prime subarrays) for clarity
-     *
      * <p>To determine the max length of relatively prime subarrays:
-     * Lemma 1. Subarrays of a R.P. (relatively prime) array are R.P.
-     * Heuristic 1. Whether another numbers is R.P. with a R.P. set is easy to determine,
+     *
+     * <ul>
+     * <li>Lemma 1. Subarrays of a R.P. (relatively prime) array are R.P.
+     * <li>Heuristic 1. Whether another numbers is R.P. with a R.P. set is easy to determine,
      * using the product of the set
+     * </ul>
      *
      * <p>The possibly premature algorithm, while prematurity may be a unnecessary concern:
-     * Traverse from the beginning of the array;
+     * <br />Traverse from the beginning of the array;
      * if finding an exception, that is, a non-R.P. number,
      * determine where the exception occurs, and start from that position.
+     * 
+     * @return max (2, max length of relatively prime subarrays) for clarity
      */
     public static int maxLength (int[] nums) {
 	int begin = 0,
@@ -50,7 +54,7 @@ public class Solution {
 	}
 	return Math.max (2, result);
     }
-    public static int gcd (int a, int b) {
+    private static int gcd (int a, int b) {
 	if (b == 0) return a;
 	return gcd (b, a % b);
     }
@@ -59,7 +63,8 @@ public class Solution {
     }
 
     /**
-     * https://leetcode.cn/problems/find-mirror-score-of-a-string/description/
+     * <a href="https://leetcode.cn/problems/find-mirror-score-of-a-string/description/">
+     * https://leetcode.cn/problems/find-mirror-score-of-a-string/description/</a>
      *
      * <p>Maybe static linked list is better.
      */
@@ -81,13 +86,13 @@ public class Solution {
 	return score;
     }
 
-    public static char mirror (char ch) {
+    private static char mirror (char ch) {
 	return (char) ('a' + (25 - (ch - 'a')));
     }
     /**
      * order of the small letter
      */
-    public static int no (char ch) {
+    private static int no (char ch) {
 	return ch - 'a';
     }
     /**
@@ -109,7 +114,8 @@ public class Solution {
     }
 
     /**
-     * https://leetcode.cn/problems/maximum-coins-from-k-consecutive-bags/
+     * <a href="https://leetcode.cn/problems/maximum-coins-from-k-consecutive-bags/">
+     * https://leetcode.cn/problems/maximum-coins-from-k-consecutive-bags/</a>
      * 
      * <p>The beginning of the k-interval is at the beginning of a coins interval,
      * or the end of the k-interval is at the end of a coins interval.
@@ -182,5 +188,92 @@ public class Solution {
 	    // System.out.println (result);
 	}
 	return result;
+    }
+
+    /**
+     * <a href="https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/">
+     * https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/</a>
+     *
+     * <p>Algorithm:
+     * <br />Just sort and traverse and reuse former calculations.
+     *
+     * <p>The recorded results are
+     * "starting from the ith interval the maximum weight achieved by choosing at most k intervals,
+     * where 0 &lt;= i &lt; intervals.length and 1 &lt;= k &lt;= 4, and the indices of the succeeding intervals".
+     *
+     * <p>Let's try top-down first.
+     *
+     * <p>(Inquiry in vain) Properties of the optimal intervals:
+     * 
+     * <ul>
+     * <li>Any of the optimal intervals cannot be replaced by another interval with a higher weight
+     * or with a same weight but with a smaller order, without violating the non-overlapping
+     * requirement.
+     * </ul>
+     */
+    public int[] maximumWeight(List<List<Integer>> intervalsMutOrNot) {
+	List <List <Integer> > intervals = new ArrayList <> (intervalsMutOrNot);
+	Collections.sort (intervals,
+			  (List <Integer> lhs, List <Integer> rhs) ->
+			  {
+			      for (int i = 0; i < 3; ++i) {
+				  int difference = lhs.get (0) - rhs.get (0);
+				  if (difference != 0)
+				      return difference;
+			      }
+			      return 0;
+			  });
+	MaxWeightMemoEntry[][] memo = createMemo (intervals.size (), 4);
+	setSingleIntervalMemoEntries (memo, intervals);
+	List <Integer> result = new ArrayList <> ();
+	result.add (getMemoEntry (memo, 0, 4).nextInterval);
+	// TODO
+	return null;
+    }
+    private static class MaxWeightMemoEntry {
+	int weight;
+	int nextInterval;
+	MaxWeightMemoEntry (int weight, int nextInterval) {
+	    this.weight = weight;
+	    this.nextInterval = nextInterval;
+	}
+    }
+    private static int intervalAfterPoint (List <List <Integer>> intervals, int point) {
+	// TODO binary search
+	return 0;
+    }
+    private static MaxWeightMemoEntry[][] createMemo (int intervalsSize, int numberOfIntervals) {
+	return new MaxWeightMemoEntry[intervalsSize][numberOfIntervals];
+    }
+    private static MaxWeightMemoEntry getMemoEntry (MaxWeightMemoEntry[][] memo,
+					    int startIndex,
+					    int numberOfIntervals) {
+	MaxWeightMemoEntry memoEntry = memo [startIndex] [numberOfIntervals - 1];
+	if (memoEntry != null)
+	    return memoEntry;
+	if (numberOfIntervals == 1) {
+	    return null;
+	    // throw new Exception ("Please set single-interval memo entries first.");
+	}
+	// TODO
+	return null;
+    }
+    private static void setMemoEntry (MaxWeightMemoEntry[][] memo,
+			      int startIndex,
+			      int numberOfIntervals,
+			      MaxWeightMemoEntry memoEntry) {
+	memo [startIndex] [numberOfIntervals - 1] = memoEntry;
+    }
+    private static void setSingleIntervalMemoEntries (MaxWeightMemoEntry[][] memo, List <List <Integer> > intervals) {
+	int currentMaxWeight = 0,
+	    currentMaxWeightInterval = intervals.size (); // wrong value, because Java forces initialization
+	for (int i = intervals.size () - 1; i >= 0; ++i) {
+	    int currentWeight = intervals.get (i).get (2);
+	    if (currentWeight >= currentMaxWeight) {
+		currentMaxWeight = currentWeight;
+		currentMaxWeightInterval = i;
+	    }
+	    setMemoEntry (memo, i, 1, new MaxWeightMemoEntry (currentMaxWeight, currentMaxWeightInterval));
+	}
     }
 }

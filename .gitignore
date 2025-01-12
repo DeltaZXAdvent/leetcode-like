@@ -10,3 +10,4 @@ ltximg
 .idea
 target
 *.o
+javadoc/
