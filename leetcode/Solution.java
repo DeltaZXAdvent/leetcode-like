@@ -194,6 +194,8 @@ public class Solution {
      * <a href="https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/">
      * https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/</a>
      *
+     * <p>The lexicographic order in the problem specification refers to that of the index arays.
+     *
      * <p>Algorithm:
      * <br />Just sort and traverse and reuse former calculations.
      *
@@ -210,70 +212,280 @@ public class Solution {
      * or with a same weight but with a smaller order, without violating the non-overlapping
      * requirement.
      * </ul>
+     *
+     * Weights must be positive or some functions will have little errors.
      */
     public int[] maximumWeight(List<List<Integer>> intervalsMutOrNot) {
-	List <List <Integer> > intervals = new ArrayList <> (intervalsMutOrNot);
+	List <NumberedInterval> intervals = new ArrayList <> ();
+	for (int i = 0; i < intervalsMutOrNot.size (); ++i) {
+	    intervals.add (new NumberedInterval (i, intervalsMutOrNot.get (i)));
+	}
 	Collections.sort (intervals,
-			  (List <Integer> lhs, List <Integer> rhs) ->
+			  (NumberedInterval lhs, NumberedInterval rhs) ->
 			  {
-			      for (int i = 0; i < 3; ++i) {
-				  int difference = lhs.get (0) - rhs.get (0);
-				  if (difference != 0)
-				      return difference;
-			      }
-			      return 0;
+			      return lhs.get (0) - rhs.get (0);
+			      // for (int i = 0; i < 3; ++i) {
+			      // 	  int difference = lhs.get (i) - rhs.get (i);
+			      // 	  if (difference != 0)
+			      // 	      return difference;
+			      // }
+			      // return 0;
 			  });
-	MaxWeightMemoEntry[][] memo = createMemo (intervals.size (), 4);
-	setSingleIntervalMemoEntries (memo, intervals);
-	List <Integer> result = new ArrayList <> ();
-	result.add (getMemoEntry (memo, 0, 4).nextInterval);
-	// TODO
-	return null;
+	// System.out.println (intervals);
+	// System.out.println (intervals);
+	MaxWeightMemo maxWeightMemo = new MaxWeightMemo (intervals, 4);
+	for (int k = 2; k <= 4; ++k) {
+	    for (int i = intervals.size () - 1; i >= 0; --i)
+		maxWeightMemo.setMemoEntryBottomUp (i, k);
+	}
+	return maxWeightMemo.getMaxWeightIntervals (0, 4);
+    }
+    private static class NumberedInterval {
+	int index;
+	List <Integer> interval;
+	public NumberedInterval (int index, List <Integer> interval) {
+	    this.index = index;
+	    this.interval = interval;
+	}
+	/**
+	 * Idk whether there is a way to directly expose the class's field as the interface
+	 */
+	Integer get (int i) {
+	    return interval.get (i);
+	}
+	public String toString () {
+	    String res = "";
+	    res += "[";
+	    for (int i = 0; i < this.interval.size (); ++i) {
+		res += String.valueOf (get (i));
+		res += " ";
+	    }
+	    res += "]";
+	    res += String.format (" at %d", index);
+	    
+	    return res;
+	}
     }
     private static class MaxWeightMemoEntry {
-	int weight;
+	long weight;
 	int nextInterval;
-	MaxWeightMemoEntry (int weight, int nextInterval) {
+	int[] indices;
+	MaxWeightMemoEntry (long weight, int nextInterval, int[] indices) {
 	    this.weight = weight;
 	    this.nextInterval = nextInterval;
+	    this.indices = indices;
 	}
-    }
-    private static int intervalAfterPoint (List <List <Integer>> intervals, int point) {
-	// TODO binary search
-	return 0;
-    }
-    private static MaxWeightMemoEntry[][] createMemo (int intervalsSize, int numberOfIntervals) {
-	return new MaxWeightMemoEntry[intervalsSize][numberOfIntervals];
-    }
-    private static MaxWeightMemoEntry getMemoEntry (MaxWeightMemoEntry[][] memo,
-					    int startIndex,
-					    int numberOfIntervals) {
-	MaxWeightMemoEntry memoEntry = memo [startIndex] [numberOfIntervals - 1];
-	if (memoEntry != null)
-	    return memoEntry;
-	if (numberOfIntervals == 1) {
-	    return null;
-	    // throw new Exception ("Please set single-interval memo entries first.");
-	}
-	// TODO
-	return null;
-    }
-    private static void setMemoEntry (MaxWeightMemoEntry[][] memo,
-			      int startIndex,
-			      int numberOfIntervals,
-			      MaxWeightMemoEntry memoEntry) {
-	memo [startIndex] [numberOfIntervals - 1] = memoEntry;
-    }
-    private static void setSingleIntervalMemoEntries (MaxWeightMemoEntry[][] memo, List <List <Integer> > intervals) {
-	int currentMaxWeight = 0,
-	    currentMaxWeightInterval = intervals.size (); // wrong value, because Java forces initialization
-	for (int i = intervals.size () - 1; i >= 0; ++i) {
-	    int currentWeight = intervals.get (i).get (2);
-	    if (currentWeight >= currentMaxWeight) {
-		currentMaxWeight = currentWeight;
-		currentMaxWeightInterval = i;
+	public String toString () {
+	    String indiceString = "[";
+	    for (int i = 0; i < indices.length; ++i) {
+		indiceString += String.valueOf (indices[i]);
+		indiceString += " ";
 	    }
-	    setMemoEntry (memo, i, 1, new MaxWeightMemoEntry (currentMaxWeight, currentMaxWeightInterval));
+	    indiceString += "]";
+	    return String.format ("weight: %d, order: %d, ", weight, nextInterval)
+		+ "indices: " + indiceString + "\n";
+	}
+    }
+    private static class MaxWeightMemo {
+	List <NumberedInterval> intervals;
+	MaxWeightMemoEntry[][] memo;
+	int[] indicesAfterInterval;
+	int numberOfIntervals;
+	/**
+	 * @param intervals sorted
+	 * @param numberOfIntervals should be positive
+	 */
+	public MaxWeightMemo (List <NumberedInterval> intervals, int numberOfIntervals) {
+	    this.intervals = intervals;
+	    this.numberOfIntervals = numberOfIntervals;
+	    memo = new MaxWeightMemoEntry[this.intervals.size () + 1][numberOfIntervals];
+	    indicesAfterInterval = new int [this.intervals.size ()];
+	    for (int i = 0; i < indicesAfterInterval.length; ++i) {
+		indicesAfterInterval[i] = intervalAfterPoint (intervals, intervals.get (i).get (1));
+	    }
+	    setNoIntervalMemoEntries ();
+	    setSingleIntervalMemoEntries ();
+	}
+	public int[] getMaxWeightIntervals (int startIndex, int wantedNumberOfIntervals) {
+	    return getMemoEntry (startIndex, wantedNumberOfIntervals).indices;
+	}
+	/**
+	 * Should be obsoleted.
+	 * 
+	 * <p> I guess an Iterator version could be written.
+	 */
+	public int[] getMaxWeightIntervalsFromScratch (int startIndex, int wantedNumberOfIntervals) {
+	    List <Integer> wanted = new ArrayList <> ();
+	    while (wantedNumberOfIntervals > 0) {
+		MaxWeightMemoEntry memoEntry = getMemoEntry (startIndex, wantedNumberOfIntervals);
+		if (memoEntry.nextInterval == intervals.size ())
+		    break;
+		// System.out.println (String.valueOf (memoEntry) + " " + intervals.get (memoEntry.nextInterval));
+		wanted.add (Integer.valueOf (intervals.get (memoEntry.nextInterval).index));
+		startIndex = indicesAfterInterval[memoEntry.nextInterval];
+		--wantedNumberOfIntervals;
+	    }
+	    int[] ans = new int[wanted.size ()];
+	    for (int i = 0; i < ans.length; ++i)
+		ans[i] = wanted.get (i).intValue ();
+	    Arrays.sort (ans);
+	    return ans;
+	}
+	private void setSingleIntervalMemoEntries () {
+	    int currentMaxWeight = 0,
+		currentMaxWeightInterval = intervals.size (); // wrong value, because Java forces initialization
+	    for (int i = intervals.size () - 1; i >= 0; --i) {
+		int currentWeight = intervals.get (i).get (2);
+		if (currentWeight > currentMaxWeight
+		    || currentWeight == currentMaxWeight
+		    && intervals.get (i).index < intervals.get (currentMaxWeightInterval).index) {
+		    currentMaxWeight = currentWeight;
+		    currentMaxWeightInterval = i;
+		}
+		int[] indices = new int[] {intervals.get (currentMaxWeightInterval).index};
+		setMemoEntry (i, 1, new MaxWeightMemoEntry (currentMaxWeight, currentMaxWeightInterval, indices));
+	    }
+	}
+	private void setNoIntervalMemoEntries () {
+	    for (int i = 1; i <= numberOfIntervals; ++i) {
+		setMemoEntry (intervals.size (), i, new MaxWeightMemoEntry (0, intervals.size (), new int[0]));
+	    }
+	}
+	/**
+	 * @param wantedNumberOfIntervals in 1..{@link #numberOfIntervals numberOfIntervals}
+	 */
+	public MaxWeightMemoEntry getMemoEntry (int startIndex, int wantedNumberOfIntervals) {
+	    // System.out.println (String.format ("entry startIndex: %d, wantedNumberOfIntervals: %d",
+	    // 				       startIndex, wantedNumberOfIntervals));
+	    MaxWeightMemoEntry memoEntry = memo [startIndex] [wantedNumberOfIntervals - 1];
+	    if (memoEntry != null) {
+		// System.out.println (String.format ("return startIndex: %d, wantedNumberOfIntervals: %d",
+		// 				   startIndex, wantedNumberOfIntervals));
+		return memoEntry;
+	    }
+	    if (numberOfIntervals == 1) {
+		return null;
+		// throw new Exception ("Please set single-interval memo entries first.");
+	    }
+	    long maxTotalWeight = 0;
+	    int nextInterval = intervals.size ();
+	    int[] bestIndices = new int[0];
+	    for (int i = startIndex; i < intervals.size (); ++i) {
+		MaxWeightMemoEntry entry = getMemoEntry (indicesAfterInterval[i], wantedNumberOfIntervals - 1);
+		long totalWeight = intervals.get (i).get (2) + entry.weight;
+		int[] newIndices = sortedArrayAdd (entry.indices, intervals.get (i).index);
+		if (totalWeight > maxTotalWeight
+		    || totalWeight == maxTotalWeight
+		    && compareLexicographically (newIndices,
+						 bestIndices) < 0) {
+		    // if (totalWeight == maxTotalWeight && maxTotalWeight != 0)
+		    // 	System.out.print (String.format ("better start interval: %d, original: %d\n"
+		    // 					 + "startPosition: %d, wantedNumberOfIntervals: %d\n"
+		    // 					 + "totalWeight: %d\n"
+		    // 					 + "bestIndices: %s, newIndices: %s\n",
+		    // 					 intervals.get (i).index,
+		    // 					 intervals.get (nextInterval).index,
+		    // 					 intervals.get (startIndex).get (0),
+		    // 					 wantedNumberOfIntervals,
+		    // 					 totalWeight,
+		    // 					 bestIndices, newIndices));
+		    maxTotalWeight = totalWeight;
+		    nextInterval = i;
+		    bestIndices = newIndices;
+		}
+	    }
+	    MaxWeightMemoEntry newMemoEntry = new MaxWeightMemoEntry (maxTotalWeight, nextInterval, bestIndices);
+	    setMemoEntry (startIndex, wantedNumberOfIntervals,
+			  newMemoEntry);
+	    // System.out.println (String.format ("Set! startIndex: %d, startPosition: %d, wantedNumberOfIntervals: %d",
+	    // 				       startIndex, intervals.get (startIndex).index, wantedNumberOfIntervals));
+	    // System.out.println (newMemoEntry);
+	    // System.out.println (String.format ("return startIndex: %d, wantedNumberOfIntervals: %d",
+	    // 				       startIndex, wantedNumberOfIntervals));
+	    return newMemoEntry;
+	}
+	public void setMemoEntryBottomUp (int startIndex, int wantedNumberOfIntervals) {
+	    MaxWeightMemoEntry candidateMemoEntry = new MaxWeightMemoEntry (0, intervals.size (), new int [0]);
+	    for (int i = startIndex; i < intervals.size (); ++i) {
+		MaxWeightMemoEntry entry = getMemoEntryBottomUp (indicesAfterInterval[i], wantedNumberOfIntervals - 1);
+		long totalWeight = intervals.get (i).get (2) + entry.weight;
+		int[] newIndices = sortedArrayAdd (entry.indices, intervals.get (i).index);
+		if (totalWeight > candidateMemoEntry.weight
+		    || totalWeight == candidateMemoEntry.weight
+		    && compareLexicographically (newIndices,
+						 candidateMemoEntry.indices) < 0) {
+		    candidateMemoEntry.weight = totalWeight;
+		    candidateMemoEntry.nextInterval = i;
+		    candidateMemoEntry.indices = newIndices;
+		}
+	    }
+	    setMemoEntry (startIndex, wantedNumberOfIntervals,
+			  candidateMemoEntry);
+	}
+	public MaxWeightMemoEntry getMemoEntryBottomUp (int startIndex, int wantedNumberOfIntervals) {
+	    return memo [startIndex] [wantedNumberOfIntervals - 1];
+	}
+
+	public void setMemoEntry (int startIndex,
+					  int wantedNumberOfIntervals,
+					  MaxWeightMemoEntry memoEntry) {
+	    memo [startIndex] [wantedNumberOfIntervals - 1] = memoEntry;
+	}
+    }
+    /**
+     * @param point exclusive starting point
+     */
+    private static int intervalAfterPoint (List <NumberedInterval> intervals, int point) {
+	int negativeIndex =
+	    Collections.binarySearch (intervals, new NumberedInterval (0, List.of (point, 0, 0)),
+				      (NumberedInterval interval, NumberedInterval intervalFromPoint) ->
+				      {
+					  return 2 * (interval.get (0) - intervalFromPoint.get (0)) - 1; // make 0 negative
+				      });
+	return -(negativeIndex + 1);
+    }
+    private static int[] sortedArrayAdd (int[] array, int element) {
+	int[] res = new int[array.length + 1];
+	int i = 0;
+	for (; i < array.length; ++i) {
+	    if (array[i] < element)
+		res[i] = array[i];
+	    else break;
+	}
+	res[i] = element;
+	++i;
+	for (; i < res.length; ++i) {
+	    res[i] = array[i - 1];
+	}
+	return res;
+	// List <Integer> lst = new ArrayList <> ();
+	// for (int i = 0; i < array.length; ++i) {
+	//     lst.add (Integer.valueOf (array[i]));
+	// }
+	// lst.add (Integer.valueOf (element));
+	// Collections.sort (lst);
+	// int[] res = new int[lst.size ()];
+	// for (int i = 0; i < res.length; ++i)
+	//     res[i] = lst.get (i).intValue ();
+	// return res;
+    }
+    /**
+     * May need better literature, but let's write it quick currently
+     */
+    private static int compareLexicographically (int[] lhs, int[] rhs) {
+	int i = 0;
+	while (true) {
+	    if (i >= lhs.length && i < rhs.length)
+		return -1;
+	    if (i < lhs.length && i >= rhs.length)
+		return 1;
+	    if (i >= lhs.length && i >= rhs.length)
+		return 0;
+	    if (lhs[i] == rhs[i]) {
+		++i;
+		continue;
+	    }
+	    return lhs[i] - rhs[i];
 	}
     }
 }
