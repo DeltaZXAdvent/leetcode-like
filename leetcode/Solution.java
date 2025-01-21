@@ -197,7 +197,7 @@ public class Solution {
      * <p>The lexicographic order in the problem specification refers to that of the index arays.
      *
      * <p>Algorithm:
-     * <br />Just sort and traverse and reuse former calculations.
+     * <br />Just sort and traverse and reuse former calculations. (Dynamic programming)
      *
      * <p>The recorded results are
      * "starting from the ith interval the maximum weight achieved by choosing at most k intervals,
@@ -213,7 +213,20 @@ public class Solution {
      * requirement.
      * </ul>
      *
-     * Weights must be positive or some functions will have little errors.
+     * <p>Efficiency sucks. Here is a good solution:
+     * <a href="https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/solutions/3039058/dong-tai-gui-hua-er-fen-cha-zhao-you-hua-wmuy/">
+     * https://leetcode.cn/problems/maximum-score-of-non-overlapping-intervals/solutions/3039058/dong-tai-gui-hua-er-fen-cha-zhao-you-hua-wmuy/</a>
+     * I give up cleaning the code. Lessons learnt for Java:
+     *
+     * <ul>
+     * <li>Use records.
+     * </ul>
+     *
+     * <p>Branch and cut?
+     *
+     * <p> <strong> OK... Actually my equation has a bad complexity... 🤣</strong>
+     *
+     * <p> Weights must be positive or some functions will have little errors.
      */
     public int[] maximumWeight(List<List<Integer>> intervalsMutOrNot) {
 	List <NumberedInterval> intervals = new ArrayList <> ();
