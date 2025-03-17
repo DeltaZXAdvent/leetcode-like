@@ -7,3 +7,6 @@ The main lessons learnt from these:
 * Recursion is usually the essence of loops.
 * Recursion formula usually exists.
 * Boyer-Moore majority vote algorithm
+
+## Disclaimer
+I use C++ (w/o C) for programming contests but it is a bad programming language.
