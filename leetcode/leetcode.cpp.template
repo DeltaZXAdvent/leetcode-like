@@ -1,0 +1,18 @@
+/**
+ * 
+ */
+#include <bits/stdc++.h>
+#include "print.h"
+static_assert(sizeof(int) * CHAR_BIT >= 32);
+using llong = long long;
+using namespace std;
+#define DUMP(x) (string(#x) + ": " + to_string(x))
+#define FOR2(i, a, b) for (int i = a; i < b; ++i)
+
+
+
+int main() {
+    Solution();
+    cout << DUMP(0) << '\n';
+    return 0;
+}

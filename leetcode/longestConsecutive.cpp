@@ -5,8 +5,6 @@
 using namespace std;
 #define DUMP(x) (string(#x) + ": " + to_string(x))
 
-// TODO numeric_limits for int? insert({}) or insert(make_pair)?
-
 class Solution {
 public:
   int longestConsecutive(vector<int>& nums) {
