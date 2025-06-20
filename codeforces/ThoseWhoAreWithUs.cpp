@@ -8,6 +8,9 @@ using namespace std;
 
 /**
  * https://codeforces.com/contest/2121/problem/C
+ *
+ * Lesson: Don't care about single-pass or multiple-pass
+ * Maybe my solution is not cache-friendly?
  */
 
 struct automaton
@@ -65,7 +68,7 @@ struct automaton
 	  {
 	    int c = cell.column;
 	    state = one_column;
-	    attribs.column = cell.column;
+	    attribs.column = c;
 	  }
 	else
 	  {
@@ -81,8 +84,7 @@ struct automaton
 	  {
 	    int r = attribs.row;
 	    state = one_center;
-	    attribs.row = r;
-	    attribs.column = cell.column;
+	    attribs.center = { r, cell.column };
 	  }
 	break;
       case one_column:
@@ -90,30 +92,35 @@ struct automaton
 	  {
 	    int c = attribs.column;
 	    state = one_center;
-	    attribs.column = c;
-	    attribs.row = cell.row;
+	    attribs.center = { cell.row, c };
 	  }
 	break;
       case two_centers:
-	if (cell.row == attribs.centers.first.row
-	    || cell.column == attribs.centers.first.column)
-	  {
-	    point ctr = attribs.centers.first;
-	    state = one_center;
-	    attribs.center = ctr;
-	  }
-	else if (cell.row == attribs.centers.second.row
-		 || cell.column == attribs.centers.second.column)
-	  {
-	    point ctr = attribs.centers.second;
-	    state = one_center;
-	    attribs.center = ctr;
-	  }
-	else
-	  {
-	    state = null;
-	  }
-	break;
+	{
+	  bool first_ok = cell.row == attribs.centers.first.row
+	    || cell.column == attribs.centers.first.column,
+	    second_ok = cell.row == attribs.centers.second.row
+	    || cell.column == attribs.centers.second.column;
+	  if (first_ok && second_ok) // seems not possible for there is an order
+	    ;
+	  else if (first_ok)
+	    {
+	      point ctr = attribs.centers.first;
+	      state = one_center;
+	      attribs.center = ctr;
+	    }
+	  else if (second_ok)
+	    {
+	      point ctr = attribs.centers.second;
+	      state = one_center;
+	      attribs.center = ctr;
+	    }
+	  else
+	    {
+	      state = null;
+	    }
+	  break;
+	}
       case one_center:
 	if (cell.row != attribs.center.row
 	    && cell.column != attribs.center.column)
@@ -130,23 +137,61 @@ struct automaton
 int main (int argc, char *argv[])
 {
   int t; cin >> t;
-  while (t--)
+  if (false)			// t == 10000 for debug
     {
-      int n, m; cin >> n >> m;
-      automaton am;
-      // cerr << "am.state: ";
-      FOR2 (i, n) FOR2 (j, m)
+      for (int k = 1; k <= t; ++k)
 	{
-	  int value;
-	  cin >> value;
-	  am.check(automaton::point { .row = i, .column = j },
-		   value);
+	  int n, m; cin >> n >> m;
+	  automaton am;
+	  // cerr << "am.state: ";
+	  FOR2 (i, n) FOR2 (j, m)
+	    {
+	      int value;
+	      cin >> value;
+	      if (k == 206)
+		{
+		  cout << '(' << am.state << ')' << value << (j == m - 1 ? '\n' : ' ');
+		  am.check(automaton::point { .row = i, .column = j },
+			   value);
+		}
+	    }
+	  if (k == 206)
+	    cout << '(' << am.state << ')' << '\n';
+	  // cerr << am.state << '\n';
+	  if (k == 206)
+	    {
+	      cout << DUMP(n) << '\n'
+		   << DUMP(m) << '\n'
+		   << DUMP(am.state) << '\n'
+		   << DUMP(am.attribs.center.row) << '\n'
+		   << DUMP(am.attribs.center.column) << '\n';
+	      if (am.state != automaton::null)
+		cout << am.maximum - 1 << '\n';
+	      else
+		cout << am.maximum << '\n';
+	    }
 	}
-      // cerr << am.state << '\n';
-      if (am.state != automaton::null)
-	cout << am.maximum - 1 << '\n';
-      else
-	cout << am.maximum << '\n';
+    }
+  else
+    {
+      for (int k = 1; k <= t; ++k)
+	{
+	  int n, m; cin >> n >> m;
+	  automaton am;
+	  // cerr << "am.state: ";
+	  FOR2 (i, n) FOR2 (j, m)
+	    {
+	      int value;
+	      cin >> value;
+	      am.check(automaton::point { .row = i, .column = j },
+		       value);
+	    }
+	  // cerr << am.state << '\n';
+	  if (am.state != automaton::null)
+	    cout << am.maximum - 1 << '\n';
+	  else
+	    cout << am.maximum << '\n';
+	}
     }
 
   return 0;
