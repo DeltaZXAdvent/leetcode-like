@@ -11,3 +11,4 @@ ltximg
 target
 *.o
 javadoc/
+html/
