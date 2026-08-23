@@ -1,4 +1,5 @@
--- <https://codeforces.com/contest/2119/problem/A>
+-- | <https://codeforces.com/contest/2119/problem/A>
+-- 
 -- Data.Bits.bitSize (0 :: Int) >= 32
 import Data.Bits (xor)
 main = do t <- readLn :: IO Int

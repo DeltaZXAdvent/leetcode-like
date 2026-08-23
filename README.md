@@ -10,3 +10,6 @@ The main lessons learnt from these:
 
 ## Disclaimer
 I use C++ (w/o C) for programming contests but it is a bad programming language.
+
+## `javadoc` usage ##
+``javadoc -d javadoc `find . -name "*.java"` ``

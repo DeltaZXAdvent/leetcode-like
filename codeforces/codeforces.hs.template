@@ -1,0 +1,10 @@
+-- | <https://codeforces.com/contest/2119/problem/A>
+-- 
+-- assert (Data.Bits.bitSize (0 :: Int) >= 32)
+main = do t <- readLn
+          foldl (>>) (return ()) (replicate t testCase)
+testCase = do line <- getLine
+              let a :: [Int]
+                  a = map read (words line)
+              print (solve )
+solve a = 
