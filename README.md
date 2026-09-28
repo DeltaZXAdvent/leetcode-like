@@ -12,4 +12,4 @@ The main lessons learnt from these:
 I use C++ (w/o C) for programming contests but it is a bad programming language.
 
 ## `javadoc` usage ##
-``javadoc -d javadoc `find . -name "*.java"` ``
+``javadoc -d javadoc --allow-script-in-comments `find . -name "*.java"` ``

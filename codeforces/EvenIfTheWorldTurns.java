@@ -37,7 +37,10 @@ import java.util.*;
  * <p>\(c_1 w + c_2 (n^2 - w)) = c n^2 \Rightarrow
  * (c_1-c_2)/n^2=(c-c_2)/w\)
  *
- * <p>This is kind of misleading? if images is not shared between the two,
+ * <p>(I was wrong, you can actually determine the target cell based only on the shape,
+ * see the following about "modulo center". And such shapes can be created
+ * with only one move.)
+ * This is kind of misleading? if images is not shared between the two,
  * there will be no way to determine the target cell because of the
  * size of the probability space.
  *
